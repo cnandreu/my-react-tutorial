@@ -4,7 +4,7 @@ var converter = new Showdown.converter();
 var HelloWorld = React.createClass({
   render : function () {
     return (
-      <p>Hello world!</p>
+      <p>Hello world.</p>
     );
   }
 });
@@ -16,7 +16,7 @@ var Comment = React.createClass({
     return (
       <div className="comment">
         <h2 className="commentAuthor">
-          {this.props.author}
+          > {this.props.author}
         </h2>
         <span dangerouslySetInnerHTML={{__html: rawMarkup}} />
       </div>
@@ -29,20 +29,18 @@ var CommentList = React.createClass({
   render : function () {
 
       var commentNodes = this.props.data.map(function (comment) {
-
         return (
           <Comment author={comment.author}>
             {comment.text}
           </Comment>
         );
-
       });
 
       return (
         <div className="commentList">
           {commentNodes}
         </div>
-      )
+      );
   }
 });
 
@@ -78,41 +76,41 @@ var CommentForm = React.createClass({
 });
 
 
+var Utils = {
+  makeNetworkCall : function (url, method, data, cb) {
+    $.ajax({
+      url: url,
+      type: method,
+      data: data,
+      dataType: 'json',
+      success : cb,
+      failure : function (xhr, status, err) {
+        console.error(url, status, err.toString());
+      }
+    });
+  }
+};
+
+
 var CommentBox = React.createClass({
 
   loadCommentsFromServer : function () {
-    $.ajax({
-      url: this.props.url,
-      dataType: 'json',
-      success : function (data) {
-        this.setState({data: data});
-      }.bind(this),
-      failure : function (xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
-    })
+    Utils.makeNetworkCall(this.props.url, 'GET', null, function (data) {
+      this.setState({data: data});
+    }.bind(this));
   },
 
   handleCommentSubmit : function (comment) {
 
+    //Shows comments on the UI before they are sent to the server.
     var comments = this.state.data;
     var newComments = comments.concat([comment]);
     this.setState({data: newComments});
 
-    $.ajax({
-      url: this.props.url,
-      dataType: 'json',
-      type: 'POST',
-      data: comment,
-      success : function (data) {
-        this.setState({data: data});
-      }.bind(this),
-      failure: function (xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
-    })
+    Utils.makeNetworkCall(this.props.url, 'POST', comment, function () {
+      this.setState({data: data});
+    }.bind(this));
   },
-
 
   getInitialState : function () {
     return {data: []};
@@ -127,7 +125,9 @@ var CommentBox = React.createClass({
     return (
       <div className="commentBox">
         <HelloWorld />
+        <hr />
         <h1>Comments</h1>
+        <hr />
         <CommentList data={this.state.data} />
         <CommentForm onCommentSubmit={this.handleCommentSubmit} />
       </div>
