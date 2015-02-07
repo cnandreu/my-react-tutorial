@@ -4,7 +4,7 @@ var converter = new Showdown.converter();
 var HelloWorld = React.createClass({
   render : function () {
     return (
-      <p>Hello world...!!!</p>
+      <p>Hello world!</p>
     );
   }
 });
