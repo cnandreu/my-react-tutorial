@@ -1,5 +1,3 @@
-var converter = new Showdown.converter();
-
 
 var HelloWorld = React.createClass({
   render : function () {
@@ -12,7 +10,7 @@ var HelloWorld = React.createClass({
 
 var Comment = React.createClass({
   render : function () {
-    var rawMarkup = converter.makeHtml(this.props.children.toString());
+    var rawMarkup = this.props.converter.makeHtml(this.props.children.toString());
     return (
       <div className="comment" key={this.props.idx}>
         <h2 className="commentAuthor">
@@ -28,9 +26,11 @@ var Comment = React.createClass({
 var CommentList = React.createClass({
   render : function () {
 
+      var converter = this.props.converter;
+
       var commentNodes = this.props.data.map(function (comment, idx) {
         return (
-          <Comment key={idx} author={comment.author}>
+          <Comment converter={converter} key={idx} author={comment.author}>
             {comment.text}
           </Comment>
         );
@@ -135,7 +135,7 @@ var CommentBox = React.createClass({
         <hr />
         <h1>Comments</h1>
         <hr />
-        <CommentList data={this.state.data}/>
+        <CommentList data={this.state.data} converter={new Showdown.converter()}/>
         <CommentForm onCommentSubmit={this.handleCommentSubmit} />
       </div>
     );
