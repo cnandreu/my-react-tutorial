@@ -92,6 +92,8 @@ var Utils = {
 };
 
 
+
+
 var CommentBox = React.createClass({
 
   loadCommentsFromServer : function () {
@@ -107,7 +109,7 @@ var CommentBox = React.createClass({
     var newComments = comments.concat([comment]);
     this.setState({data: newComments});
 
-    Utils.makeNetworkCall(this.props.url, 'POST', comment, function () {
+    Utils.makeNetworkCall(this.props.url, 'POST', comment, function (data) {
       this.setState({data: data});
     }.bind(this));
   },
@@ -117,8 +119,13 @@ var CommentBox = React.createClass({
   },
 
   componentDidMount : function () {
+
     this.loadCommentsFromServer();
-    setInterval(this.loadCommentsFromServer, this.props.pollInterval);
+
+    this.props.socket.onmessage = function (evt) {
+      //It is assumed that evt.data is always the array of comments.
+      this.setState({data: JSON.parse(evt.data)});
+    }.bind(this);
   },
 
   render : function () {
@@ -128,7 +135,7 @@ var CommentBox = React.createClass({
         <hr />
         <h1>Comments</h1>
         <hr />
-        <CommentList data={this.state.data} />
+        <CommentList data={this.state.data}/>
         <CommentForm onCommentSubmit={this.handleCommentSubmit} />
       </div>
     );
@@ -136,8 +143,12 @@ var CommentBox = React.createClass({
 });
 
 
+
 React.render(
-  <CommentBox url="comments.json" pollInterval={2000} />,
+  <CommentBox
+    url="comments.json"
+    socket={new WebSocket("ws://localhost:3001")}
+  />,
   document.getElementById('content')
 );
 
