@@ -14,7 +14,7 @@ var Comment = React.createClass({
   render : function () {
     var rawMarkup = converter.makeHtml(this.props.children.toString());
     return (
-      <div className="comment">
+      <div className="comment" key={this.props.idx}>
         <h2 className="commentAuthor">
           > {this.props.author}
         </h2>
@@ -28,9 +28,9 @@ var Comment = React.createClass({
 var CommentList = React.createClass({
   render : function () {
 
-      var commentNodes = this.props.data.map(function (comment) {
+      var commentNodes = this.props.data.map(function (comment, idx) {
         return (
-          <Comment author={comment.author}>
+          <Comment key={idx} author={comment.author}>
             {comment.text}
           </Comment>
         );
